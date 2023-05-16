@@ -1,9 +1,9 @@
 #### Repository for: A novel method for tracking microswimmers in 3D
-The authors of the code in this repository are Hadi Albalkhi* and Max Riekeles*. 
+
+The authors of the code in this repository are Hadi Albalkhi* and Max Riekeles*.
 Contact: riekeles@tu-berlin.de
 
-_* Both authors contributed to the code in equal shares._ 
-
+_* Both authors contributed to the code in equal shares._
 
 ## Prerequisites
 
@@ -14,20 +14,21 @@ _* Both authors contributed to the code in equal shares._
     - matplotlib
 - For generating the MHI refer to the [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)
 - Datasets described in the paper can be found here:
-  - [Raw holograms frames of Bacillus Subtilis at different temperatures](https://doi.org/10.5061/dryad.ns1rn8pv6)
-  - [Dataset for “Identifying and Characterizing Motile and Fluorescent Microorganisms in Microscopy Data Using Onboard Science Autonomy”](https://doi.org/10.48577/jpl.2KTVW5)
-  
-After the reconstructions of the holograms have been generated, a typical run of the software is:
-1. create maximum z-projections
-2. create MHI with [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)
-3. perform BLob detection in the maximum z projections at each time point
-4. apply region growing to the MHI (either manually or with automatic seedpoint selection)
-5. apply Z-layer selection
-6. 3D Plot
-7. apply DBSCAN if necessary.
-8. apply time filtering if necessary.
+    - [Raw holograms frames of Bacillus Subtilis at different temperatures](https://doi.org/10.5061/dryad.ns1rn8pv6)
+    - [Dataset for “Identifying and Characterizing Motile and Fluorescent Microorganisms in Microscopy Data Using Onboard Science Autonomy”](https://doi.org/10.48577/jpl.2KTVW5)
 
-## Max-Z Projection
+After the reconstructions of the holograms have been generated, a typical run of the code is:
+
+1. Create maximum z-projections
+2. Create MHI (with [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)) from the maximum z-projections
+3. Perform blob detection in the maximum z-projections at each time point
+4. Apply region growing to the MHI (either manually or with automatic seedpoint selection)
+5. Apply Z-layer selection 
+   1. apply DBSCAN if necessary.
+   2. apply time filtering if necessary.
+6. 3D Plot
+
+## Max Z-Projection
 
 Calculates the maximum projection through the Z stack of reconstructed holograms for the given range of timepoints.
 
@@ -36,7 +37,7 @@ Calculates the maximum projection through the Z stack of reconstructed holograms
 - the script assumes that `<reconstructions>`:
     - contains multiple folders for each timepoint of the recorded experiment.
     - each folder contains the reconstruction of the hologram at the corresponding timepoint.
-    - the folder names are five-digit numbers  `xxxxx` (with leading zeros where needed) which represents the
+    - the folder names are five-digit numbers  `xxxxx` (with leading zeros where needed) which represent the
       timestamps.
       The timestamps will be written to the resulting filenames and will be used in consequent processing steps (blob
       detection for instance).
@@ -51,7 +52,7 @@ Calculates the maximum projection through the Z stack of reconstructed holograms
     --end-timepoint 851
   ```
 - results will be saved to `<output_dir>/` (or per default to `./<data_set>_max_z_projection_results` &Dagger;) and the
-  max-Z projection filenames will be in the form:
+  max Z-projection filenames will be in the form:
   `max_z_projection_zs_<z_start_plane>_ze_<z_end_plane>_<z_plane_jump_steps>_<timestamp>.tif`
 
 ### Parameters Overview
@@ -68,15 +69,15 @@ Calculates the maximum projection through the Z stack of reconstructed holograms
 | `--z-plane-jump-steps`  | `-zj` | No       | `1`           | Z-plane jump steps                                                                         |
 | `--zeros-padding-width` | -     | No       | `5`           | Zeros padding width of folder names of reconstructed timepoints                            |
 
-
 ## Blob Detection
 
-This script applies OpenCV SimpleBlobDetector on provided Max-Z projection images and save the results in a npy-file.
+This script applies OpenCV SimpleBlobDetector on provided max Z-projection images and save the results as NumPy
+  array files (`.npy`).
 
 ### Usage
 
-- the script requires `<max_z_projections>` to contain the Max-Z projections image files with a specific naming format
-  as described in max-z projection above:
+- the script requires `<max_z_projections>` to contain the max Z-projections image files with a specific naming format
+  as described in max Z-projection above:
   `some_file_name_xxxxx.tif`
   where `xxxxx` is a five-digit number (with leading zeros where needed) which represents the timestamp.
     - this is important because the script will extract the timestamp i.e. the value of the time frame out of the
@@ -98,13 +99,12 @@ This script applies OpenCV SimpleBlobDetector on provided Max-Z projection image
 
 | Argument              | Short | Required | Default Value | Description                                                                                     |
 |-----------------------|-------|----------|---------------|-------------------------------------------------------------------------------------------------|
-| `--max-z-projections` | `-p`  | Yes      | N/A           | Path to the Max-Z projection files of all time points.                                          |
+| `--max-z-projections` | `-p`  | Yes      | N/A           | Path to the max Z-projection files of all time points.                                          |
 | `--dataset`           | `-d`  | Yes      | N/A           | Name of the dataset of the MHI, used only for naming the resulting track segment.               |
 | `--output-dir`        | `-o`  | No       | &Dagger;      | Path to the directory where the results will be stored.                                         |
 | `--min-area`          | -     | No       | `60`          | Change the minimum area (in pixels) of blobs, smaller blobs will be filtered out (default: 60). |
 | `--max-area`          | -     | No       | `300`         | Change the maximum area (in pixels) of blobs, larger blobs will be filtered out (default: 300). |
 | `--max-threshold`     | -     | No       | `255`         | Change the maxThreshold value for openCV SimpleBlobDetector (default: 255).                     |
-
 
 ## Region Growing - manual seed selection
 
@@ -114,7 +114,7 @@ Performs region growing on a given MHI from a manually selected seed point.
 
 - the script requires `<path_to_mhi>` to contain two files: `<data_set>_mhi.npy` and `<data_set>_mhi.png`
   For instance: when dataset is `DS1` then the files should be `DS1_mhi.npy`and `DS1_mhi.png`
-- the seed can be set by clicking on the mhi or by providing the x and y coordinated from the command line.
+- the seed can be set by clicking on the mhi or by providing the x and y coordinates from the command line.
 - example run:
 
   ```
@@ -151,8 +151,7 @@ Performs region growing on a given MHI from a manually selected seed point.
 | `--seed-x`              | `-x`   | No       | N/A           | x-coordinate of the seed point for the region growing.                                    | -     ||
 | `--seed-y`              | `-y`   | No       | N/A           | y-coordinate of the seed point for the region growing.                                    |
 
-
-## Z-Layers Selection
+## Z-Layer Selection
 
 The script uses the output of previous steps along with the reconstructed holograms of the recorded experiment to find
 the best estimate of the z coordinate of each blob on a given track segment.
@@ -179,19 +178,19 @@ the best estimate of the z coordinate of each blob on a given track segment.
 
 ### Parameters Overview
 
-| Argument                | Short Form | Required | Default Value | Description                                                                                                                                                  |
-|-------------------------|------------|----------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `--dataset`             | `-d`       | Yes      | N/A           | Name of the dataset of the MHI                                                                                                                               |
-| `--mhi-npy-file`        | `-mhi`     | Yes      | N/A           | Path to the motion history image (MHI) npy-file                                                                                                              |
-| `--reconstructions`     | `-r`       | Yes      | N/A           | Path to reconstructions of the holograms - contains folders of all timepoints                                                                                |
-| `--tracks`              | `-tr`      | Yes      | N/A           | Path to the 2D track segments, which are the results of region growing                                                                                       |
-| `--blobs-file`          | `-b`       | Yes      | N/A           | Path to the detected blobs npy-file. The file is the result of blob_detection. The file contains the blobs of all timepoints regardless of any track segment |
-| `--z-start-plane`       | `-zs`      | Yes      | N/A           | Z-plane start value**                                                                                                                                        |
-| `--z-end-plane`         | `-ze`      | Yes      | N/A           | Z-plane end value**                                                                                                                                          |
-| `--output-dir`          | `-o`       | No       | &Dagger;      | The directory to which the results will be stored                                                                                                            |
-| `--mhi-time-tolerance`  | -          | No       | N/A           | MHI time tolerance - if not provided no filtering will take place.                                                                                           |
-| `--min-diameter-size`   | -          | No       | `0`           | Blobs with smaller diameter size will not be considered                                                                                                      |
-| `--zeros-padding-width` | -          | No       | `5`           | Zeros padding width of folder names of reconstructed timepoints                                                                                              |
+| Argument                | Short  | Required | Default Value | Description                                                                                                                                                  |
+|-------------------------|--------|----------|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `--dataset`             | `-d`   | Yes      | N/A           | Name of the dataset of the MHI                                                                                                                               |
+| `--mhi-npy-file`        | `-mhi` | Yes      | N/A           | Path to the motion history image (MHI) npy-file                                                                                                              |
+| `--reconstructions`     | `-r`   | Yes      | N/A           | Path to reconstructions of the holograms - contains folders of all timepoints                                                                                |
+| `--tracks`              | `-tr`  | Yes      | N/A           | Path to the 2D track segments, which are the results of region growing                                                                                       |
+| `--blobs-file`          | `-b`   | Yes      | N/A           | Path to the detected blobs npy-file. The file is the result of blob_detection. The file contains the blobs of all timepoints regardless of any track segment |
+| `--z-start-plane`       | `-zs`  | Yes      | N/A           | Z-plane start value**                                                                                                                                        |
+| `--z-end-plane`         | `-ze`  | Yes      | N/A           | Z-plane end value**                                                                                                                                          |
+| `--output-dir`          | `-o`   | No       | &Dagger;      | The directory to which the results will be stored                                                                                                            |
+| `--mhi-time-tolerance`  | -      | No       | N/A           | MHI time tolerance - if not provided no filtering will take place.                                                                                           |
+| `--min-diameter-size`   | -      | No       | `0`           | Blobs with smaller diameter size will not be considered                                                                                                      |
+| `--zeros-padding-width` | -      | No       | `5`           | Zeros padding width of folder names of reconstructed timepoints                                                                                              |
 
 ** this should be the exact value used to calculate the may-Z projections. In future versions of this script, these
 values will be read automatically.
@@ -236,19 +235,37 @@ python region_growing_automatic_seed_selection.py \
 The script plots the output of the z-layer selection in 3D
 
 ### Usage
+
 Set in line 15 the path of the file.
 Adjust in line 26 the FOW according to the used optics.
 
 ## DBSCAN
 
-The script performs a clustering additionally in the z axis and is useful if the output of the z-layerselection apparently consists of too many tracks. The results strongly depended on the distance metric and the maximum distance allowed for a point to be considered a part of a cluster. The clustered tracks are saved separetley each in own folders.
+The script performs a clustering additionally in the z axis and is useful if the output of the z-layerselection
+apparently consists of too many tracks. The results strongly depended on the distance metric and the maximum distance
+allowed for a point to be considered a part of a cluster. The clustered tracks are saved separetley each in own folders.
 
 ### Usage
+
 Adjust the parameters in line 79.
 
-## time filtering
-This script is for time filtering after the z-layer selection. It is useful when the output from the z-layer selection is too noisy. To eliminate unrelated particles, the time associated with each particle to the time value of the corresponding pixel on the MHI is compared. 
+## Time filtering
+
+After applying the z-layer selection - if the output is too noisy - this script could be useful.
+It eliminates unrelated particles by comparing the time associated with each particle to the corresponding time value on
+the MHI.
 
 ### Usage
-Adjust the parameter in line 7 (time tolerance) and point to the file to be used in 21 and 23. Set the MHI (npy-file) in line 27.
+
+-tbd
+
+### Parameters Overview
+
+| Argument               | Short   | Required | Default Value | Description                                                               |
+|------------------------|---------|----------|---------------|---------------------------------------------------------------------------|
+| `--mhi-npy-file`       | `-mhi`  | Yes      | N/A           | Path to the motion history image (MHI) npy-file.                          |
+| `--track-2d`           | `-ts2d` | Yes      | N/A           | Path to the 2D track segment npy-file, which corresponds to the 3D track. |
+| `--track-3d`           | `-ts3d` | Yes      | N/A           | Path to the 3D track segment npy-file, which will be filtered.            |
+| `--mhi-time-tolerance` | -       | No       | `None`        | MHI time tolerance - if not provided no filtering will take place.        |
+
 
