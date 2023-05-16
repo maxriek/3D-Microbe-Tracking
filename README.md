@@ -13,13 +13,15 @@ _* Both authors contributed to the code in equal shares._
     - opencv2
     - matplotlib
 - For generating the MHI refer to the [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)
-- Datasets described in the paper can be found [here](https://doi.org/10.48577/jpl.2KTVW5)
-
+- Datasets described in the paper can be found here:
+  - [Raw holograms frames of Bacillus Subtilis at different temperatures](https://doi.org/10.5061/dryad.ns1rn8pv6)
+  - [Dataset for “Identifying and Characterizing Motile and Fluorescent Microorganisms in Microscopy Data Using Onboard Science Autonomy”](https://doi.org/10.48577/jpl.2KTVW5)
+  
 After the reconstructions of the holograms have been generated, a typical run of the software is:
-1. Create maximum z-projections
-2. create MHI (external) [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)
+1. create maximum z-projections
+2. create MHI with [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)
 3. perform BLob detection in the maximum z projections at each time point
-4. apply regiongrowing to the MHI (either manually or with automatic seedpoint selection)
+4. apply region growing to the MHI (either manually or with automatic seedpoint selection)
 5. apply Z-layer selection
 6. 3D Plot
 7. apply DBSCAN if necessary.
@@ -65,6 +67,45 @@ Calculates the maximum projection through the Z stack of reconstructed holograms
 | `--z-end-plane`         | `-ze` | Yes      | N/A           | Z-plane end value                                                                          |
 | `--z-plane-jump-steps`  | `-zj` | No       | `1`           | Z-plane jump steps                                                                         |
 | `--zeros-padding-width` | -     | No       | `5`           | Zeros padding width of folder names of reconstructed timepoints                            |
+
+
+## Blob Detection
+
+This script applies OpenCV SimpleBlobDetector on provided Max-Z projection images and save the results in a npy-file.
+
+### Usage
+
+- the script requires `<max_z_projections>` to contain the Max-Z projections image files with a specific naming format
+  as described in max-z projection above:
+  `some_file_name_xxxxx.tif`
+  where `xxxxx` is a five-digit number (with leading zeros where needed) which represents the timestamp.
+    - this is important because the script will extract the timestamp i.e. the value of the time frame out of the
+      filename.
+- example run:
+
+  ```
+  python blob_detection.py \
+      --dataset ds1 \
+      --max-z-projections /ds1/projections 
+  ```
+- results will be saved to `<output_dir>/` (or per default to `./<data_set>_blob_detection_results` &Dagger;) as NumPy
+  array files (`.npy`).
+  Each blob is itself an array of the form:
+
+  `[x, y, timestamp, <diameter_of_detected_blob>]`
+
+### Parameters Overview
+
+| Argument              | Short | Required | Default Value | Description                                                                                     |
+|-----------------------|-------|----------|---------------|-------------------------------------------------------------------------------------------------|
+| `--max-z-projections` | `-p`  | Yes      | N/A           | Path to the Max-Z projection files of all time points.                                          |
+| `--dataset`           | `-d`  | Yes      | N/A           | Name of the dataset of the MHI, used only for naming the resulting track segment.               |
+| `--output-dir`        | `-o`  | No       | &Dagger;      | Path to the directory where the results will be stored.                                         |
+| `--min-area`          | -     | No       | `60`          | Change the minimum area (in pixels) of blobs, smaller blobs will be filtered out (default: 60). |
+| `--max-area`          | -     | No       | `300`         | Change the maximum area (in pixels) of blobs, larger blobs will be filtered out (default: 300). |
+| `--max-threshold`     | -     | No       | `255`         | Change the maxThreshold value for openCV SimpleBlobDetector (default: 255).                     |
+
+
 ## Region Growing - manual seed selection
 
 Performs region growing on a given MHI from a manually selected seed point.
@@ -110,43 +151,6 @@ Performs region growing on a given MHI from a manually selected seed point.
 | `--seed-x`              | `-x`   | No       | N/A           | x-coordinate of the seed point for the region growing.                                    | -     ||
 | `--seed-y`              | `-y`   | No       | N/A           | y-coordinate of the seed point for the region growing.                                    |
 
-
-
-## Blob Detection
-
-This script applies OpenCV SimpleBlobDetector on provided Max-Z projection images and save the results in a npy-file.
-
-### Usage
-
-- the script requires `<max_z_projections>` to contain the Max-Z projections image files with a specific naming format
-  as described in max-z projection above:
-  `some_file_name_xxxxx.tif`
-  where `xxxxx` is a five-digit number (with leading zeros where needed) which represents the timestamp.
-    - this is important because the script will extract the timestamp i.e. the value of the time frame out of the
-      filename.
-- example run:
-
-  ```
-  python blob_detection.py \
-      --dataset ds1 \
-      --max-z-projections /ds1/projections 
-  ```
-- results will be saved to `<output_dir>/` (or per default to `./<data_set>_blob_detection_results` &Dagger;) as NumPy
-  array files (`.npy`).
-  Each blob is itself an array of the form:
-
-  `[x, y, timestamp, <diameter_of_detected_blob>]`
-
-### Parameters Overview
-
-| Argument              | Short | Required | Default Value | Description                                                                                     |
-|-----------------------|-------|----------|---------------|-------------------------------------------------------------------------------------------------|
-| `--max-z-projections` | `-p`  | Yes      | N/A           | Path to the Max-Z projection files of all time points.                                          |
-| `--dataset`           | `-d`  | Yes      | N/A           | Name of the dataset of the MHI, used only for naming the resulting track segment.               |
-| `--output-dir`        | `-o`  | No       | &Dagger;      | Path to the directory where the results will be stored.                                         |
-| `--min-area`          | -     | No       | `60`          | Change the minimum area (in pixels) of blobs, smaller blobs will be filtered out (default: 60). |
-| `--max-area`          | -     | No       | `300`         | Change the maximum area (in pixels) of blobs, larger blobs will be filtered out (default: 300). |
-| `--max-threshold`     | -     | No       | `255`         | Change the maxThreshold value for openCV SimpleBlobDetector (default: 255).                     |
 
 ## Z-Layers Selection
 
@@ -247,5 +251,4 @@ This script is for time filtering after the z-layer selection. It is useful when
 
 ### Usage
 Adjust the parameter in line 7 (time tolerance) and point to the file to be used in 21 and 23. Set the MHI (npy-file) in line 27.
-
 
