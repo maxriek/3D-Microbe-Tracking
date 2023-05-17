@@ -8,6 +8,34 @@ import numpy as np
 import file_utils
 
 
+def main():
+    script_start = datetime.now()
+    print("start time: ", script_start)
+
+    detected_blobs = []
+    list_of_images = os.listdir(MAX_Z_BASE_PATH)
+    list_of_images.sort()
+    for image_filename in list_of_images:
+        start = datetime.now()
+        print(f'processing: {image_filename} ## ')
+
+        img = cv.imread(os.path.join(MAX_Z_BASE_PATH, image_filename))
+        key_points = detect_blobs(img)
+
+        for c in key_points:
+            time = int(file_utils.get_time_string_from_max_z_file_name(image_filename))
+            detected_blobs.append([c.pt[0], c.pt[1], time, c.size])
+
+        save_results(detected_blobs)
+        end = datetime.now()
+        print("elapsed time: ", end - start)
+
+    save_results(detected_blobs)
+    script_end = datetime.now()
+    print("end time: ", script_end)
+    print("total time elapsed: ", script_end - script_start)
+
+
 def detect_blobs(im):
     # invert image colors because simpleBlobDetector seems to expect bright background and dark blobs
     im = cv.bitwise_not(im)
@@ -58,55 +86,38 @@ def save_results(detected_blobs):
             file.write(f'{key}: {value}\n')
 
 
-def main():
-    script_start = datetime.now()
-    print("start time: ", script_start)
-
-    detected_blobs = []
-    list_of_images = os.listdir(MAX_Z_BASE_PATH)
-    list_of_images.sort()
-    for image_filename in list_of_images:
-        start = datetime.now()
-        print(f'processing: {image_filename} ## ')
-
-        img = cv.imread(os.path.join(MAX_Z_BASE_PATH, image_filename))
-        key_points = detect_blobs(img)
-
-        for c in key_points:
-            time = int(file_utils.get_time_string_from_max_z_file_name(image_filename))
-            detected_blobs.append([c.pt[0], c.pt[1], time, c.size])
-
-        save_results(detected_blobs)
-        end = datetime.now()
-        print("elapsed time: ", end - start)
-
-    save_results(detected_blobs)
-    script_end = datetime.now()
-    print("end time: ", script_end)
-    print("total time elapsed: ", script_end - script_start)
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='''Apply OpenCV SimpleBlobDetector on provided Max-Z projection images and save the results in 
         an npy-file. For a detailed description of the parameters, please refer to the README file.''')
 
-    parser.add_argument('--max-z-projections', type=str, required=True,
+    parser.add_argument('--max-z-projections',
+                        type=str,
+                        required=True,
                         help='path to the Max-Z projection files of all time points.')
 
-    parser.add_argument('--output-dir', '-o', type=str,
+    parser.add_argument('--output-dir', '-o',
+                        type=str,
                         help='path to the directory where the results will be stored (default: ./<dataset>_blob_detection_results)')
 
-    parser.add_argument('--dataset', type=str, required=True,
+    parser.add_argument('--dataset',
+                        type=str,
+                        required=True,
                         help='name of the dataset of the MHI - used only for naming the resulting track segment.')
 
-    parser.add_argument('--min-area', type=int, default=60,
+    parser.add_argument('--min-area',
+                        type=int,
+                        default=60,
                         help='change the minimum area of blobs - smaller blobs will be filtered out(default: 60).')
 
-    parser.add_argument('--max-area', type=int, default=300,
+    parser.add_argument('--max-area',
+                        type=int,
+                        default=300,
                         help='change the maximum area of blobs - smaller blobs will be filtered out(default: 300).')
 
-    parser.add_argument('--max-threshold', type=int, default=255,
+    parser.add_argument('--max-threshold',
+                        type=int,
+                        default=255,
                         help='change the maxThreshold value for openCV SimpleBlobDetector (default: 255).')
 
     args = parser.parse_args()

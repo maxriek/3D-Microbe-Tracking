@@ -10,6 +10,32 @@ import find_focus as ff
 import image_utils
 
 
+def main():
+    max_z_blobs = np.load(BLOBS_FILE)
+    mhi_ = np.load(MHI_NPY_FILE)
+    mhi = cv.resize(mhi_.astype(float), (2048, 2048), interpolation=cv.INTER_CUBIC)
+
+    for track_name in os.listdir(PATH_TO_TRACK_SEGMENTS_2D):
+        track_segment = np.load(f'{PATH_TO_TRACK_SEGMENTS_2D}/{track_name}')
+        if track_segment.shape == (2048, 2048, 3):
+            track_segment = track_segment[:, :, 0]
+
+        # filter centers which belong to path_to_time_point segment
+        blobs_on_track_segment = get_blobs_on_segment(max_z_blobs, track_segment, mhi)
+        save_blobs_on_track_segment(blobs_on_track_segment, track_name)
+
+        print('finding focus for all microbes (centers)...')
+
+        blobs_3d_coordinates_tg_small, blobs_3d_coordinates_tg_large, blobs_3d_coordinates_ala_max_small, blobs_3d_coordinates_ala_max_large = find_z_coordinates_of_blobs(
+            blobs_on_track_segment)
+
+        track_3d_file_path = f'{OUTPUT_DIR}/3d_{track_name}'
+        np.save(f'{track_3d_file_path}_ala_tenengrad_small', blobs_3d_coordinates_tg_small)
+        np.save(f'{track_3d_file_path}_ala_tenengrad_large', blobs_3d_coordinates_tg_large)
+        np.save(f'{track_3d_file_path}_ala_max_small', blobs_3d_coordinates_ala_max_small)
+        np.save(f'{track_3d_file_path}_ala_max_large', blobs_3d_coordinates_ala_max_large)
+
+
 def in_time_tolerance_range(point, mhi):
     if MHI_TIME_TOLERANCE is None:
         return True
@@ -60,7 +86,8 @@ def find_z_coordinates_of_blobs(blobs_on_track_segment):
     current_loaded_max_z = blobs_on_track_segment[0][2]
     path_to_time_point = get_path_to_time_point(current_loaded_max_z)
 
-    all_z_layers_at_current_time = file_utils.load_z_layers_at_time_point(path_to_time_point, Z_START_PLANE, Z_END_PLANE)
+    all_z_layers_at_current_time = file_utils.load_z_layers_at_time_point(path_to_time_point, Z_START_PLANE,
+                                                                          Z_END_PLANE)
 
     start = datetime.now()
     for blob in blobs_on_track_segment:
@@ -76,7 +103,8 @@ def find_z_coordinates_of_blobs(blobs_on_track_segment):
         if current_loaded_max_z != max_z_time_point:
             current_loaded_max_z = max_z_time_point
             path_to_time_point = get_path_to_time_point(current_loaded_max_z)
-            all_z_layers_at_current_time = file_utils.load_z_layers_at_time_point(path_to_time_point, Z_START_PLANE, Z_END_PLANE)
+            all_z_layers_at_current_time = file_utils.load_z_layers_at_time_point(path_to_time_point, Z_START_PLANE,
+                                                                                  Z_END_PLANE)
 
         z_coordinate_tenengrad_small = ff.find_focus_layer_tenengrad_focus_metric(blob,
                                                                                   all_z_layers_at_current_time,
@@ -102,83 +130,74 @@ def find_z_coordinates_of_blobs(blobs_on_track_segment):
     return blobs_3d_coordinates_tg_small, blobs_3d_coordinates_tg_large, blobs_3d_coordinates_ala_max_small, blobs_3d_coordinates_ala_max_large
 
 
-def main():
-    max_z_blobs = np.load(BLOBS_FILE)
-    mhi_ = np.load(MHI_NPY_FILE)
-    mhi = cv.resize(mhi_.astype(float), (2048, 2048), interpolation=cv.INTER_CUBIC)
-
-    for track_name in os.listdir(PATH_TO_TRACK_SEGMENTS_2D):
-        track_segment = np.load(f'{PATH_TO_TRACK_SEGMENTS_2D}/{track_name}')
-        if track_segment.shape == (2048, 2048, 3):
-            track_segment = track_segment[:, :, 0]
-
-        # filter centers which belong to path_to_time_point segment
-        blobs_on_track_segment = get_blobs_on_segment(max_z_blobs, track_segment, mhi)
-        save_blobs_on_track_segment(blobs_on_track_segment, track_name)
-
-        print('finding focus for all microbes (centers)...')
-
-        blobs_3d_coordinates_tg_small, blobs_3d_coordinates_tg_large, blobs_3d_coordinates_ala_max_small, blobs_3d_coordinates_ala_max_large = find_z_coordinates_of_blobs(
-            blobs_on_track_segment)
-
-        track_3d_file_path = f'{OUTPUT_DIR}/3d_{track_name}'
-        np.save(f'{track_3d_file_path}_ala_tenengrad_small', blobs_3d_coordinates_tg_small)
-        np.save(f'{track_3d_file_path}_ala_tenengrad_large', blobs_3d_coordinates_tg_large)
-        np.save(f'{track_3d_file_path}_ala_max_small', blobs_3d_coordinates_ala_max_small)
-        np.save(f'{track_3d_file_path}_ala_max_large', blobs_3d_coordinates_ala_max_large)
-
-    return 0
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description='''Find the best estimate of the z coordinate of each blob on a given track segment.
                      For a detailed description of the usage and parameters, please refer to the README file.''')
 
     # Add arguments
-    parser.add_argument('--dataset', '-d', type=str, required=True,
+    parser.add_argument('--dataset', '-d',
+                        type=str,
+                        required=True,
                         help='name of the dataset of the MHI')
 
-    parser.add_argument('--mhi-npy-file', '-mhi', type=str, required=True,
+    parser.add_argument('--mhi-npy-file', '-mhi',
+                        type=str,
+                        required=True,
                         help='path to the motion history image (MHI) npy-file.')
 
-    parser.add_argument('--reconstructions', '-r', type=str, required=True,
+    parser.add_argument('--reconstructions', '-r',
+                        type=str,
+                        required=True,
                         help='Path to reconstructions of the holograms - contains folders of all timepoints')
 
-    parser.add_argument('--tracks', '-tr', type=str, required=True,
+    parser.add_argument('--tracks', '-tr',
+                        type=str,
+                        required=True,
                         help='Path to the 2D track segments, which are the results of region growing')
 
-    parser.add_argument('--blobs-file', '-b', type=str, required=True,
+    parser.add_argument('--blobs-file', '-b',
+                        type=str,
+                        required=True,
                         help='path to the detected blobs npy-file. '
                              'The file is the result of blob_detection. '
                              'The file contains the blobs of all timepoints regardless of any track segment')
 
-    parser.add_argument('--z-start-plane', '-zs', type=int, required=True,
+    parser.add_argument('--z-start-plane', '-zs',
+                        type=int,
+                        required=True,
                         help='Z-plane start value - '
                              'this should be the exact value used to calculate the may-Z projections')
 
-    parser.add_argument('--z-end-plane', '-ze',type=int, required=True,
+    parser.add_argument('--z-end-plane', '-ze',
+                        type=int,
+                        required=True,
                         help='Z-plane end value - '
                              'this should be the exact value used to calculate the may-Z projections')
 
-    parser.add_argument('--output-dir', '-o', type=str,
+    parser.add_argument('--output-dir', '-o',
+                        type=str,
                         help='the directory to which the results will be stored '
                              '(default: ./<dataset>_z_layer_selection_results)')
 
-    parser.add_argument('--mhi-time-tolerance', type=int, default=None,
+    parser.add_argument('--mhi-time-tolerance',
+                        type=int,
+                        default=None,
                         help='MHI time tolerance - if not provided no filtering will take place. '
                              'Please refer to the README for more information')
 
-    parser.add_argument('--min-diameter-size', type=int, default=0,
+    parser.add_argument('--min-diameter-size',
+                        type=int,
+                        default=0,
                         help='Blobs with smaller diameter size will not be considered (default: 0)')
 
-    parser.add_argument('--zeros-padding-width', type=int, default=5,
+    parser.add_argument('--zeros-padding-width',
+                        type=int,
+                        default=5,
                         help='Zeros padding width of folder names of reconstructed timepoints (default: 5)')
 
-    # Parse arguments
     args = parser.parse_args()
 
-    # Assign the values to variables
     DATASET = args.dataset
     MHI_NPY_FILE = args.mhi_npy_file
     PATH_TO_RECONSTRUCTIONS = args.reconstructions

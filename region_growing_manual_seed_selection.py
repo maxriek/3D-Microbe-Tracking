@@ -49,6 +49,7 @@ def main():
     cv2.waitKey()
     cv2.destroyAllWindows()
 
+
 def on_mouse(event, x, y, flags, params):
     global clicks
     if event == cv2.EVENT_LBUTTONDOWN:
@@ -129,37 +130,57 @@ if __name__ == '__main__':
         description='''Perform region growing on a given MHI from a manually selected seed point. 
                      For a detailed description of the parameters, please refer to the README file.''')
 
-    parser.add_argument(
-        '--path-to-mhi', '-mhi', type=str, required=True,
-        help='path to the motion history image (MHI) file.')
+    parser.add_argument('--path-to-mhi', '-mhi',
+                        type=str,
+                        required=True,
+                        help='path to the motion history image (MHI) file.')
 
-    parser.add_argument(
-        '--output-dir', '-o', type=str,
-        help='the directory to which the results will be stored (default: ./<dataset>_region_growing_results)')
+    parser.add_argument('--output-dir', '-o',
+                        type=str,
+                        help='the directory to which the results will be stored '
+                             '(default: ./<dataset>_region_growing_results)')
 
-    parser.add_argument('--dataset', '-d', type=str, required=True,
+    parser.add_argument('--dataset', '-d',
+                        type=str,
+                        required=True,
                         help='name of the dataset of the MHI - used only for naming the resulting track segment.')
 
-    parser.add_argument('--track-nr', '-t', type=int, default=1,
-                        help='track number - used only for naming the resulting track segment (default: 1).')
+    parser.add_argument('--track-nr', '-t',
+                        type=int,
+                        help='track number - used only for naming the resulting track segment (default: 1).',
+                        default=1)
 
-    parser.add_argument('--radius', '-r', type=int, default=5,
-                        help='search radius for neighboring pixels (default: 5).')
+    parser.add_argument('--radius', '-r',
+                        type=int,
+                        help='search radius for neighboring pixels (default: 5).',
+                        default=5)
 
-    parser.add_argument('--threshold', type=int, default=5,
-                        help='the time difference threshold for comparing two pixels (default: 5).')
+    parser.add_argument('--threshold',
+                        type=int,
+                        help='the time difference threshold for comparing two pixels (default: 5).',
+                        default=5)
 
-    parser.add_argument('--rejection-threshold', type=int, default=1,
-                        help='number of rejection votes for a pixel to be excluded from a region (default: 1).')
+    parser.add_argument('--rejection-threshold',
+                        type=int,
+                        help='number of rejection votes for a pixel to be excluded from a region (default: 1).',
+                        default=1)
 
-    parser.add_argument('--n-values-to-ignore', '-n', type=int, default=3,
-                        help='used to filter out the most prominent n values in the mhi (default: 3).')
+    parser.add_argument('--n-values-to-ignore', '-n',
+                        type=int,
+                        help='used to filter out the most prominent n values in the mhi (default: 3).',
+                        default=3)
 
-    parser.add_argument('--seed-x', '-x', type=int, default=None,
-                        help='x-coordinate of the seed point for the region growing - only used if provided along with SEED_Y.')
+    parser.add_argument('--seed-x', '-x',
+                        type=int,
+                        help='x-coordinate of the seed point for the region growing - '
+                             'only used if provided along with SEED_Y.',
+                        default=None)
 
-    parser.add_argument('--seed-y', '-y', type=int, default=None,
-                        help='y-coordinate of the seed point for the region growing - only used if provided along with SEED_X.')
+    parser.add_argument('--seed-y', '-y',
+                        type=int,
+                        help='y-coordinate of the seed point for the region growing - '
+                             'only used if provided along with SEED_X.',
+                        default=None)
 
     args = parser.parse_args()
 

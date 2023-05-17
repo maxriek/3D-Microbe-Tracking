@@ -53,8 +53,8 @@ if __name__ == '__main__':
 
     parser.add_argument('--mhi-time-tolerance',
                         type=int,
-                        default=None,
-                        help='MHI time tolerance - if not provided no filtering will take place.')
+                        help='MHI time tolerance - if not provided no filtering will take place.',
+                        default=None)
 
     args = parser.parse_args()
 
