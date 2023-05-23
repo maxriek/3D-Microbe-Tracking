@@ -246,7 +246,7 @@ if __name__ == "__main__":
     parser.add_argument('--track-3d', '-ts3d',
                         type=str,
                         help='path to the 3D track segment npy-file',
-                        default='./some_3d_track.npy')
+                        default='./')
 
     parser.add_argument('--dbscan-eps', '-eps',
                         type=float,

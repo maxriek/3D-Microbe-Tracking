@@ -6,6 +6,7 @@ Contact: riekeles@tu-berlin.de
 _* Both authors contributed to the code in equal shares._
 
 ## Prerequisites
+
 - Python 3.8
 - Python packages:
     - numpy
@@ -22,9 +23,9 @@ After the reconstructions of the holograms have been generated, a typical run of
 2. Create MHI (with [OWLS-repository](https://github.com/JPLMLIA/OWLS-Autonomy)) from the maximum z-projections
 3. Perform blob detection in the maximum z-projections at each time point
 4. Apply region growing to the MHI (either manually or with automatic seedpoint selection)
-5. Apply Z-layer selection 
-   1. apply DBSCAN if necessary.
-   2. apply time filtering if necessary.
+5. Apply Z-layer selection
+    1. apply DBSCAN if necessary.
+    2. apply time filtering if necessary.
 6. 3D Plot
 
 ## Max Z-Projection
@@ -71,7 +72,7 @@ Calculates the maximum projection through the Z stack of reconstructed holograms
 ## Blob Detection
 
 This script applies OpenCV SimpleBlobDetector on provided max Z-projection images and save the results as NumPy
-  array files (`.npy`).
+array files (`.npy`).
 
 ### Usage
 
@@ -235,8 +236,7 @@ The script plots the output of the z-layer selection in 3D
 
 ### Usage
 
-Set in line 15 the path of the file.
-Adjust in line 26 the FOW according to the used optics.
+In line `8`, set the variable `centers_max_z` to the path to the 3D track npy-file, which will be plotted.
 
 ## DBSCAN
 
@@ -255,6 +255,12 @@ python dbscan.py \
     --dbscan-min-samples 10
 ```
 
+### Parameters Overview
+| Argument               | Short   | Required | Default Value | Description                           |
+|------------------------|---------|----------|---------------|---------------------------------------|
+| `--track-3d`           | `-ts3d` | Yes      | N/A           | Path to the 3D track segment npy-file |
+| `--dbscan-eps`         | `-eps`  | No       | `0.15`        | DBSCAN EPS parameter                  |
+| `--dbscan-min-samples` | `-ms`   | No       | `10`          | DBSCAN min_samples parameter          |
 
 ## Time filtering
 
@@ -263,6 +269,7 @@ It eliminates unrelated particles by comparing the time associated with each par
 the MHI.
 
 ### Usage
+
 - results will be saved to `<output_dir>/` (or per default to `./<dataset>_time_filtering_results` &Dagger;) as NumPy
   array files (`.npy`)
 - example run:
@@ -279,13 +286,13 @@ python time_filtering.py \
 
 ### Parameters Overview
 
-| Argument               | Short   | Required | Default Value | Description                                                               |
-|------------------------|---------|----------|---------------|---------------------------------------------------------------------------|
-| `--dataset`             | `-d`   | Yes      | N/A           | Name of the dataset of the MHI - used only for naming the resulting track segment.                                                                            |
-| `--mhi-npy-file`       | `-mhi`  | Yes      | N/A           | Path to the motion history image (MHI) npy-file.                          |
-| `--track-2d`           | `-ts2d` | Yes      | N/A           | Path to the 2D track segment npy-file, which corresponds to the 3D track. |
-| `--track-3d`           | `-ts3d` | Yes      | N/A           | Path to the 3D track segment npy-file, which will be filtered.            |
-| `--mhi-time-tolerance` | -       | No       | `None`        | MHI time tolerance - if not provided no filtering will take place.        |
-| `--output-dir`          | `-o`   | No       | &Dagger;      | The directory to which the results will be stored.                                                                                                            |
+| Argument               | Short   | Required | Default Value | Description                                                                        |
+|------------------------|---------|----------|---------------|------------------------------------------------------------------------------------|
+| `--dataset`            | `-d`    | Yes      | N/A           | Name of the dataset of the MHI - used only for naming the resulting track segment. |
+| `--mhi-npy-file`       | `-mhi`  | Yes      | N/A           | Path to the motion history image (MHI) npy-file.                                   |
+| `--track-2d`           | `-ts2d` | Yes      | N/A           | Path to the 2D track segment npy-file, which corresponds to the 3D track.          |
+| `--track-3d`           | `-ts3d` | Yes      | N/A           | Path to the 3D track segment npy-file, which will be filtered.                     |
+| `--mhi-time-tolerance` | -       | No       | `None`        | MHI time tolerance - if not provided no filtering will take place.                 |
+| `--output-dir`         | `-o`    | No       | &Dagger;      | The directory to which the results will be stored.                                 |
 
 
