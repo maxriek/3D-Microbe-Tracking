@@ -17,7 +17,7 @@ def main():
     coordinates_3d_with_time = coordinates_3d[:, :4]
 
     # -- Plot before dbscan to see how everything looks like --------------------------------------
-    # axis_3d_no_dbscan = plot_3d_with_color(coordinates_3d_with_time)
+    axis_3d_no_dbscan = plot_3d_with_color(coordinates_3d_with_time)
     # plot_color_bar_of_timepoints(time)
     # plt.savefig(f'{TRACK_3D_NPY_BASE_FILENAME}.png', format='png')
     # plt.show()
@@ -38,8 +38,12 @@ def main():
     # plt.show()
     # -- ------------------------------------------------------------------------------------------
 
-    # -- Plot after dbscan - with clouds around clusters - and save results to disk----------------
-    plot_3d_with_clouds(coordinates_3d, db, plot_noise=PLOT_NOISE_POINTS, save_clusters=SAVE_CLUSTERS_TO_DISK)
+    # -- Plot after dbscan - plot the clouds around clusters and save results to disk--------------
+    plot_3d_with_clouds(coordinates_3d,
+                        db,
+                        plot_noise=PLOT_NOISE_POINTS,
+                        save_clusters=SAVE_CLUSTERS_TO_DISK,
+                        axis_3d=axis_3d_no_dbscan)
 
     if PLOT_NOISE_POINTS:
         plt.savefig(f'{TRACK_3D_NPY_BASE_FILENAME}_clusters_{n_clusters_}_n_noise_points_{n_noise_}.png', format='png')
@@ -47,6 +51,7 @@ def main():
         plt.savefig(
             f'{TRACK_3D_NPY_BASE_FILENAME}_clusters_{n_clusters_}_n_noise_points_{n_noise_}_no_noise_points.png',
             format='png')
+
     plt.show()
     # -- ------------------------------------------------------------------------------------------
 
@@ -154,20 +159,19 @@ def plot_color_bar_of_timepoints(time):
 
 
 def plot_3d_without_noise_no_cloud(coordinates_3d_with_time, db):
-    time = coordinates_3d_with_time[:, 3]
-    time_points_colors = create_time_points_colors(time)
     core_samples_mask = create_core_samples_mask(db)
     labels = db.labels_
 
     axis_3d = setup_3d_plot()
     mask = labels == -1
     xyzt = coordinates_3d_with_time[~mask & core_samples_mask]
-    no_noise_time_points_colors = np.array(time_points_colors)[~mask & core_samples_mask]
-    plot_3d_with_color(xyzt, no_noise_time_points_colors)
+    plot_3d_with_color(xyzt)
     return axis_3d
 
 
-def plot_3d_with_clouds(coordinates_3d, db, plot_noise, save_clusters):
+def plot_3d_with_clouds(coordinates_3d, db, plot_noise, save_clusters, axis_3d=None):
+    if axis_3d is None:
+        axis_3d = setup_3d_plot()
     coordinates_3d_with_time = coordinates_3d[:, :4]
 
     labels = db.labels_
@@ -178,14 +182,13 @@ def plot_3d_with_clouds(coordinates_3d, db, plot_noise, save_clusters):
     label_colors = [plt.cm.rainbow(each) for each in np.linspace(0, 1, len(unique_labels))]
     core_samples_mask = create_core_samples_mask(db)
 
-    axis_3d = setup_3d_plot()
     plt.title(f'Estimated number of clusters: {n_clusters_}\n'
               f'Estimated number of noise points: {n_noise_}')
 
     # create a legend with label colors
     handles = [plt.Rectangle((0, 0), 1, 1, fc=tuple(label_colors[i])) for i in range(len(unique_labels))]
-    labels = [f'Track {i + 1}' for i in range(len(unique_labels) - 1)]
-    axis_3d.legend(handles, labels, framealpha=0.0)
+    legend_labels = [f'Track {i + 1}' for i in range(len(unique_labels) - 1)]
+    axis_3d.legend(handles, legend_labels, framealpha=0.0)
 
     for k, col in zip(unique_labels, label_colors):
         # use black for noise points
@@ -223,7 +226,6 @@ def plot_3d_with_clouds(coordinates_3d, db, plot_noise, save_clusters):
                         , facecolor=tuple(col)
                         , s=60
                         , alpha=0.25)
-
         if save_clusters:
             xyzt_and_diameter = coordinates_3d[class_member_mask]
             if k == -1:
