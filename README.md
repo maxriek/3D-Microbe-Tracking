@@ -6,7 +6,6 @@ Contact: riekeles@tu-berlin.de
 _* Both authors contributed to the code in equal shares._
 
 ## Prerequisites
-
 - Python 3.8
 - Python packages:
     - numpy
@@ -113,7 +112,7 @@ Performs region growing on a given MHI from a manually selected seed point.
 ### Usage
 
 - the script requires `<path_to_mhi>` to contain two files: `<data_set>_mhi.npy` and `<data_set>_mhi.png`
-  For instance: when dataset is `DS1` then the files should be `DS1_mhi.npy`and `DS1_mhi.png`
+  For instance: when dataset is `ds1` then the files should be `ds1_mhi.npy`and `DS1_mhi.png`
 - the seed can be set by clicking on the mhi or by providing the x and y coordinates from the command line.
 - example run:
 
@@ -163,7 +162,7 @@ the best estimate of the z coordinate of each blob on a given track segment.
   ```
   python z_layer_selection.py  \
       --dataset ds1 \
-      --mhi-npy-file /ds1/path/to/mhi.npy \
+      --mhi-npy-file /ds1/path/to/ds1_mhi.npy \
       --blobs-file /ds1/blob_detection_results/detected_blobs.npy \
       --reconstructions /ds1/path/to/holograms/reconstructions \
       --tracks /ds1/region_growing_results/path/to/2dtracks \
@@ -204,7 +203,7 @@ values will be read automatically.
 ```
 python region_growing_automatic_seed_selection.py \
     --dataset ds1 \
-    --mhi-npy-file /ds1/path/to/mhi.npy \
+    --mhi-npy-file /ds1/path/to/ds1_mhi.npy \
     --blobs-file /ds1/blob_detection_results/detected_blobs.npy \
     --output-dir /path/to/output \
     --radius 7 \
@@ -247,7 +246,15 @@ allowed for a point to be considered a part of a cluster. The clustered tracks a
 
 ### Usage
 
-Adjust the parameters in line 79.
+- example run:
+
+```
+python dbscan.py \
+    --track-3d ./some_3d_track.npy \
+    --dbscan-eps 0.15 \
+    --dbscan-min-samples 10
+```
+
 
 ## Time filtering
 
@@ -256,16 +263,29 @@ It eliminates unrelated particles by comparing the time associated with each par
 the MHI.
 
 ### Usage
+- results will be saved to `<output_dir>/` (or per default to `./<dataset>_time_filtering_results` &Dagger;) as NumPy
+  array files (`.npy`)
+- example run:
 
--tbd
+```
+python time_filtering.py \
+    --dataset ds1 \
+    --output-dir /path/to/output \
+    --mhi-npy-file /path/to/ds1_mhi.npy \
+    --track-2d /path/to/track_2d_nr_1_ds1.npy \
+    --track-3d /path/to/track_3d_nr_1_ds1.npy \
+    --mhi-time-tolerance 5
+```
 
 ### Parameters Overview
 
 | Argument               | Short   | Required | Default Value | Description                                                               |
 |------------------------|---------|----------|---------------|---------------------------------------------------------------------------|
+| `--dataset`             | `-d`   | Yes      | N/A           | Name of the dataset of the MHI - used only for naming the resulting track segment.                                                                            |
 | `--mhi-npy-file`       | `-mhi`  | Yes      | N/A           | Path to the motion history image (MHI) npy-file.                          |
 | `--track-2d`           | `-ts2d` | Yes      | N/A           | Path to the 2D track segment npy-file, which corresponds to the 3D track. |
 | `--track-3d`           | `-ts3d` | Yes      | N/A           | Path to the 3D track segment npy-file, which will be filtered.            |
 | `--mhi-time-tolerance` | -       | No       | `None`        | MHI time tolerance - if not provided no filtering will take place.        |
+| `--output-dir`          | `-o`   | No       | &Dagger;      | The directory to which the results will be stored.                                                                                                            |
 
 
