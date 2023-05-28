@@ -232,7 +232,7 @@ python region_growing_automatic_seed_selection.py \
 
 ## 3d plot
 
-The script plots the output of the z-layer selection in 3D
+The script plots the output of the Z-layer selection in 3D.
 
 ### Usage
 
@@ -240,9 +240,12 @@ In line `8`, set the variable `centers_max_z` to the path to the 3D track npy-fi
 
 ## DBSCAN
 
-The script performs a clustering additionally in the z axis and is useful if the output of the z-layerselection
-apparently consists of too many tracks. The results strongly depended on the distance metric and the maximum distance
-allowed for a point to be considered a part of a cluster. The clustered tracks are saved separetley each in own folders.
+The script performs clustering additionally in the z-axis with DBSCAN. 
+It is useful when the output of the Z-layer selection potentially consists of several tracks. 
+The results strongly depended on the distance metric and the maximum distance allowed for a point to 
+be considered a part of a cluster. 
+The parameter `min_samples` is the minimum number for a group of points - close enough to each other - to be considered a cluster.  
+The clustered tracks are saved separately each in its own npy-file.
 
 ### Usage
 
@@ -264,8 +267,9 @@ python dbscan.py \
 
 ## Time filtering
 
-After applying the z-layer selection - if the output is too noisy - this script could be useful.
-It eliminates unrelated particles by comparing the time associated with each particle to the corresponding time value on
+After applying the Z-layer selection, usually the output is very noisy and this script could be useful
+for eliminating unrelated particles. 
+This is done by comparing the time associated with each particle to the corresponding time value on
 the MHI.
 
 ### Usage
