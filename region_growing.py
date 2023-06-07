@@ -53,8 +53,9 @@ class RegionGrowing:
         max_pixel_value = np.max(mhi)
         min_pixel_value = np.min(mhi)
         counts, _ = np.histogram(mhi.ravel(), max_pixel_value, [min_pixel_value, max_pixel_value])
-        largest_n_indices = np.argsort(counts)[:self.n_values_to_ignore]
-        return largest_n_indices
+        largest_n_indices = np.argsort(counts)
+        potential_background_values = largest_n_indices[-self.n_values_to_ignore:] + 1
+        return potential_background_values
 
     # Implement Region Growing Algorithm: Starting with a given seed point, the algorithm
     # checks all the neighbour within a given radius and determine according to the
