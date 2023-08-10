@@ -3,6 +3,9 @@
 The authors of the code in this repository are Hadi Albalkhi* and Max Riekeles*.
 Contact: riekeles@tu-berlin.de
 
+All software is licensed according to the JPL Software License.
+
+
 _* Both authors contributed to the code in equal shares._
 
 ## Prerequisites
