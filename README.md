@@ -3,7 +3,7 @@
 The authors of the code in this repository are Hadi Albalkhi* and Max Riekeles*.
 Contact: riekeles@tu-berlin.de
 
-All software is licensed according to the JPL Software License.(https://github.com/JPLMLIA/OWLS-Autonomy/blob/master/LICENSE.md)
+All software is licensed according to the [JPL Software License](https://github.com/JPLMLIA/OWLS-Autonomy/blob/master/LICENSE.md)
 
 
 _* Both authors contributed to the code in equal shares._
