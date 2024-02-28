@@ -1,4 +1,4 @@
-#### Repository for: A novel method for tracking microswimmers in 3D
+#### Repository for: Motion History Images: a New Method for Tracking Microswimmers in 3D
 
 The authors of the code in this repository are Hadi Albalkhi* and Max Riekeles*.
 Contact: riekeles@tu-berlin.de
